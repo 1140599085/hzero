@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--name：服务名，order：排序，description：描述-->
+<service name="hzero--template-demo" order="0" description="模板样例">
+    <!--name：模块名称，description：描述，fileName：文件名，schema：数据库-->
+    <excel name="hzero-data-message-demo" description="消息数据" fileName="hzero-message" schema="hzero_message">
+        <!--name：名称，description：页面显示名称和Excel页名称-->
+        <sheet name="hzero-message-template-demo" description="消息模板">
+            <!--name：表名，description：描述-->
+            <table name="hmsg_message_template" description="消息模板">
+                <!--sql语句，包含需要查询的字段和where条件，主表别名为 t -->
+                <sql>select
+                    template_id,template_code,template_name,template_title,template_content,message_category_code,message_subcategory_code,external_code,sql_value,lang,enabled_flag,tenant_id
+                    from hmsg_message_template where 1=1
+                </sql>
+                <!--自增主键-->
+                <id>template_id</id>
+                <!--引用字段-->
+                <cited>template_id</cited>
+                <!--唯一性索引-->
+                <unique>template_code,lang,tenant_id</unique>
+            </table>
+            <table name="hmsg_template_arg" description="消息模板">
+                <!--sql语句，包含需要查询的字段和where条件，主表别名为t-->
+                <sql>select arg_id,template_id,arg_name,description from hmsg_template_arg where 1=1</sql>
+                <!--自增主键-->
+                <id>arg_id</id>
+                <!--引用字段-->
+                <cited>arg_id</cited>
+                <!--唯一性索引-->
+                <unique>template_id,arg_name</unique>
+                <!--多语言，field：多语言列，pkName：关联主键-->
+                <lang>
+                    <field>description</field>
+                    <pkName>arg_id</pkName>
+                </lang>
+                <!--field：关联列，tableName：关联的表，columnName：关联的列-->
+                <reference>
+                    <field>template_id</field>
+                    <!--跨sheet页引用需要，这里的sheetName为了description名称-->
+                    <sheetName>角色</sheetName>
+                    <tableName>hmsg_message_template</tableName>
+                    <columnName>template_id</columnName>
+                </reference>
+            </table>
+        </sheet>
+        <!--name：名称，description：页面显示名称和Excel页名称-->
+        <sheet name="hzero-message-template2" description="消息模板2">
+        </sheet>
+    </excel>
+</service>

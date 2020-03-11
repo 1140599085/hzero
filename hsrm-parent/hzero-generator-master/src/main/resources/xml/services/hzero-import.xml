@@ -1,0 +1,292 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<service name="hzero-import" order="40" description="导入服务">
+    <excel name="hzero-data-import" description="导入服务数据" fileName="hzero-import" schema="hzero_import">
+        <sheet name="hzero-import-template" description="导入模板">
+            <table name="himp_template_header" description="导入模板头">
+                <sql>select
+                    id,template_code,template_name,enabled_flag,template_type,prefix_patch,description,tenant_id
+                    from himp_template_header
+                </sql>
+                <id>id</id>
+                <cited>id</cited>
+                <unique>template_code,tenant_id</unique>
+            </table>
+            <table name="himp_template_target" description="导入模板定位">
+                <sql>select
+                    id,header_id,sheet_index,sheet_name,datasource_code,table_name,rule_script_code,enabled_flag
+                    from himp_template_target
+                </sql>
+                <id>id</id>
+                <cited>id</cited>
+                <unique>sheet_index</unique>
+                <reference>
+                    <field>header_id</field>
+                    <tableName>himp_template_header</tableName>
+                    <columnName>id</columnName>
+                </reference>
+            </table>
+            <table name="himp_template_line" description="导入模板行">
+                <sql>select
+                    id,target_id,column_index,column_name,column_code,column_type,length,enabled_flag,nullable_flag,validate_flag
+                    ,change_data_flag,max_value,min_value,validate_set,regular_expression,tenant_id,format_mask,sample_data,description
+                    from himp_template_line
+                </sql>
+                <id>id</id>
+                <unique>column_index</unique>
+                <reference>
+                    <field>target_id</field>
+                    <tableName>himp_template_target</tableName>
+                    <columnName>id</columnName>
+                </reference>
+            </table>
+        </sheet>
+    </excel>
+    <excel name="hzero-iam-menu" description="菜单数据" fileName="hzero-iam-menu" schema="hzero_platform">
+        <sheet name="iam-menu-saas" description="导入服务菜单SAAS版">
+            <table name="iam_menu" description="导入服务菜单-saas">
+                <sql>select id,
+                    code,
+                    name,
+                    h_quick_index,
+                    fd_level,
+                    parent_id,
+                    type,
+                    sort,
+                    is_default,
+                    icon,
+                    route,
+                    h_custom_flag,
+                    h_tenant_id,
+                    h_level_path,
+                    h_virtual_flag,
+                    h_controller_type,
+                    h_permission_type,
+                    h_description,
+                    h_enabled_flag,
+                    CATEGORY
+                    from iam_menu
+                    where code like 'hzero.site.himp%' or code like 'hzero.himp%'
+                </sql>
+                <id>id</id>
+                <cited>id</cited>
+                <unique>code,fd_level,h_tenant_id</unique>
+                <lang>
+                    <field>name</field>
+                    <pkName>id</pkName>
+                </lang>
+                <reference>
+                    <field>parent_id</field>
+                    <tableName>iam_menu</tableName>
+                    <columnName>id</columnName>
+                </reference>
+            </table>
+            <table name="iam_menu_permission" description="导入服务菜单权限-saas">
+                <sql>select id,menu_id,permission_code
+                    from iam_menu_permission
+                    where menu_id IN ( SELECT id FROM iam_menu im
+                    where code like 'hzero.site.himp%' or code like 'hzero.himp%' )
+                </sql>
+                <id>id</id>
+                <cited>id</cited>
+                <unique>permission_code</unique>
+                <reference>
+                    <field>menu_id</field>
+                    <tableName>iam_menu</tableName>
+                    <columnName>id</columnName>
+                </reference>
+            </table>
+        </sheet>
+        <sheet name="iam-menu-op" description="导入服务菜单OP版">
+            <table name="iam_menu" description="导入服务菜单-op">
+                <sql>select id,
+                    code,
+                    name,
+                    h_quick_index,
+                    fd_level,
+                    parent_id,
+                    type,
+                    sort,
+                    is_default,
+                    icon,
+                    route,
+                    h_custom_flag,
+                    h_tenant_id,
+                    h_level_path,
+                    h_virtual_flag,
+                    h_controller_type,
+                    h_permission_type,
+                    h_description,
+                    h_enabled_flag,
+                    CATEGORY
+                    from iam_menu
+                    where code like 'hzero.himp%'
+                </sql>
+                <id>id</id>
+                <cited>id</cited>
+                <unique>code,fd_level,h_tenant_id</unique>
+                <lang>
+                    <field>name</field>
+                    <pkName>id</pkName>
+                </lang>
+                <reference>
+                    <field>parent_id</field>
+                    <tableName>iam_menu</tableName>
+                    <columnName>id</columnName>
+                </reference>
+            </table>
+            <table name="iam_menu_permission" description="导入服务菜单权限-op">
+                <!--sql语句，包含需要查询的字段和where条件，主表别名为 t -->
+                <sql>select id,menu_id,permission_code
+                    from iam_menu_permission
+                    where menu_id IN ( SELECT id FROM iam_menu im
+                    where code like 'hzero.himp%' )
+                </sql>
+                <id>id</id>
+                <cited>id</cited>
+                <unique>permission_code</unique>
+                <reference>
+                    <field>menu_id</field>
+                    <tableName>iam_menu</tableName>
+                    <columnName>id</columnName>
+                </reference>
+            </table>
+        </sheet>
+    </excel>
+    <excel name="hzero-platform-lov" description="值集数据" fileName="hzero-platform-lov" schema="hzero_platform">
+        <sheet name="lov" description="值集数据">
+            <table name="hpfm_lov" description="LOV表">
+                <sql>select lov_id,
+                    lov_code,
+                    lov_type_code,
+                    route_name,
+                    lov_name,
+                    description,
+                    tenant_id,
+                    parent_lov_code,
+                    parent_tenant_id,
+                    custom_sql,
+                    custom_url,
+                    value_field,
+                    display_field,
+                    must_page_flag,
+                    enabled_flag,
+                    translation_sql
+                    from hpfm_lov
+                    where lov_code like 'HIMP%' and enabled_flag=1
+                </sql>
+                <id>lov_id</id>
+                <cited>lov_id</cited>
+                <unique>lov_code,tenant_id</unique>
+                <lang>
+                    <field>lov_name</field>
+                    <pkName>lov_id</pkName>
+                </lang>
+                <lang>
+                    <field>description</field>
+                    <pkName>lov_id</pkName>
+                </lang>
+            </table>
+            <table name="hpfm_lov_value" description="LOV独立值集表">
+                <sql>select lov_value_id,
+                    lov_id,
+                    lov_code,
+                    value,
+                    meaning,
+                    description,
+                    tenant_id,
+                    tag,
+                    order_seq,
+                    parent_value,
+                    start_date_active,
+                    end_date_active,
+                    enabled_flag
+                    from hpfm_lov_value
+                    where lov_code like 'HIMP%' and enabled_flag=1
+                </sql>
+                <id>lov_value_id</id>
+                <unique>lov_id,value,tenant_id,parent_value</unique>
+                <lang>
+                    <field>meaning</field>
+                    <pkName>lov_value_id</pkName>
+                </lang>
+                <lang>
+                    <field>description</field>
+                    <pkName>lov_value_id</pkName>
+                </lang>
+                <reference>
+                    <field>lov_id</field>
+                    <tableName>hpfm_lov</tableName>
+                    <columnName>lov_id</columnName>
+                </reference>
+            </table>
+            <table name="hpfm_lov_view_header" description="值集查询视图头表">
+                <sql>select view_header_id,
+                    view_code,
+                    view_name,
+                    lov_id,
+                    tenant_id,
+                    value_field,
+                    display_field,
+                    title,
+                    width,
+                    height,
+                    page_size,
+                    delay_load_flag,
+                    children_field_name,
+                    enabled_flag
+                    from hpfm_lov_view_header
+                    where view_code like 'HIMP%' and enabled_flag=1
+                </sql>
+                <id>view_header_id</id>
+                <cited>view_header_id</cited>
+                <unique>view_code,tenant_id</unique>
+                <lang>
+                    <field>view_name</field>
+                    <pkName>view_header_id</pkName>
+                </lang>
+                <lang>
+                    <field>title</field>
+                    <pkName>view_header_id</pkName>
+                </lang>
+                <reference>
+                    <field>lov_id</field>
+                    <tableName>hpfm_lov</tableName>
+                    <columnName>lov_id</columnName>
+                </reference>
+            </table>
+            <table name="hpfm_lov_view_line" description="值集查询视图行表">
+                <sql>select view_line_id,
+                    view_header_id,
+                    tenant_id,
+                    lov_id,
+                    display,
+                    order_seq,
+                    field_name,
+                    query_field_flag,
+                    table_field_flag,
+                    table_field_width,
+                    enabled_flag
+                    from hpfm_lov_view_line
+                    where view_header_id in (select view_header_id from hpfm_lov_view_header WHERE view_code like 'HIMP%')
+                </sql>
+                <id>view_line_id</id>
+                <cited>view_line_id</cited>
+                <unique>view_header_id,tenant_id,lov_id,display,order_seq,field_name</unique>
+                <lang>
+                    <field>display</field>
+                    <pkName>view_line_id</pkName>
+                </lang>
+                <reference>
+                    <field>view_header_id</field>
+                    <tableName>hpfm_lov_view_header</tableName>
+                    <columnName>view_header_id</columnName>
+                </reference>
+                <reference>
+                    <field>lov_id</field>
+                    <tableName>hpfm_lov</tableName>
+                    <columnName>lov_id</columnName>
+                </reference>
+            </table>
+        </sheet>
+    </excel>
+</service>

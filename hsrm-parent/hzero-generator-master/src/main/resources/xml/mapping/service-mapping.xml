@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--服务映射-->
+<services>
+    <service name="hzero-platform" schema="hzero_platform" description="平台服务"/>
+    <service name="hzero-admin" schema="hzero_admin" description="平台治理服务"/>
+    <service name="hzero-asgard" schema="hzero_asgard" description="事务服务"/>
+    <service name="hzero-file" schema="hzero_file" description="文件服务"/>
+    <service name="hzero-message" schema="hzero_message" description="消息服务"/>
+    <service name="hzero-scheduler" schema="hzero_scheduler" description="调度服务"/>
+    <service name="hzero-import" schema="hzero_import" description="通用导入服务"/>
+    <service name="hzero-interface" schema="hzero_interface" description="接口服务"/>
+    <service name="hzero-transfer" schema="hzero_transfer" description="数据分发服务"/>
+    <service name="hzero-workflow-plus" schema="hzero_workflow_plus" description="新工作流服务"/>
+    <service name="hzero-report" schema="hzero_report" description="报表服务"/>
+    <service name="hzero-monitor" schema="hzero_monitor" description="监控审计服务"/>
+    <service name="hzero-pay" schema="hzero_pay" description="支付服务"/>
+    <service name="hzero-invoice" schema="hzero_invoice" description="发票服务"/>
+    <service name="hzero-im" schema="hzero_im" description="即时通讯服务"/>
+    <service name="hzero-iot" schema="hzero_iot" description="IoT服务"/>
+    <service name="hzero-nlp" schema="hzero_nlp" description="内容提取服务"/>
+    <service name="hzero-ocr" schema="hzero_ocr" description="OCR服务"/>
+    <service name="hzero-webexcel" schema="hzero_webexcel" description="WebExcel服务"/>
+    <service name="hzero-low-code" schema="hzero_low_code" description="LowCode服务"/>
+    <service name="hzero-search" schema="hzero_search" description="检索服务"/>
+</services>

@@ -1,0 +1,142 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--name：服务名，order：排序，description：描述-->
+<service name="hzero-webexcel" order="70" description="WebExcel服务">
+    <!--name：模块名称，description：描述，fileName：文件名，schema：数据库-->
+    <excel name="hzero-platform-lov" description="值集数据" fileName="hzero-platform-lov" schema="hzero_platform">
+        <sheet name="lov" description="值集数据">
+            <table name="hpfm_lov" description="LOV表">
+                <sql>select lov_id,
+                    lov_code,
+                    lov_type_code,
+                    route_name,
+                    lov_name,
+                    description,
+                    tenant_id,
+                    parent_lov_code,
+                    parent_tenant_id,
+                    custom_sql,
+                    custom_url,
+                    value_field,
+                    display_field,
+                    must_page_flag,
+                    enabled_flag,
+                    translation_sql
+                    from hpfm_lov
+                    where lov_code like 'HEXL%'
+                </sql>
+                <id>lov_id</id>
+                <cited>lov_id</cited>
+                <unique>lov_code,tenant_id</unique>
+                <lang>
+                    <field>lov_name</field>
+                    <pkName>lov_id</pkName>
+                </lang>
+                <lang>
+                    <field>description</field>
+                    <pkName>lov_id</pkName>
+                </lang>
+            </table>
+            <table name="hpfm_lov_value" description="LOV独立值集表">
+                <sql>select lov_value_id,
+                    lov_id,
+                    lov_code,
+                    value,
+                    meaning,
+                    description,
+                    tenant_id,
+                    tag,
+                    order_seq,
+                    parent_value,
+                    start_date_active,
+                    end_date_active,
+                    enabled_flag
+                    from hpfm_lov_value
+                    where lov_code like 'HEXL%'
+                </sql>
+                <id>lov_value_id</id>
+                <unique>lov_id,value,tenant_id,parent_value</unique>
+                <lang>
+                    <field>meaning</field>
+                    <pkName>lov_value_id</pkName>
+                </lang>
+                <lang>
+                    <field>description</field>
+                    <pkName>lov_value_id</pkName>
+                </lang>
+                <reference>
+                    <field>lov_id</field>
+                    <tableName>hpfm_lov</tableName>
+                    <columnName>lov_id</columnName>
+                </reference>
+            </table>
+            <table name="hpfm_lov_view_header" description="值集查询视图头表">
+                <sql>select view_header_id,
+                    view_code,
+                    view_name,
+                    lov_id,
+                    tenant_id,
+                    value_field,
+                    display_field,
+                    title,
+                    width,
+                    height,
+                    page_size,
+                    delay_load_flag,
+                    children_field_name,
+                    enabled_flag
+                    from hpfm_lov_view_header
+                    where view_code like 'HEXL%'
+                </sql>
+                <id>view_header_id</id>
+                <cited>view_header_id</cited>
+                <unique>view_code,tenant_id</unique>
+                <lang>
+                    <field>view_name</field>
+                    <pkName>view_header_id</pkName>
+                </lang>
+                <lang>
+                    <field>title</field>
+                    <pkName>view_header_id</pkName>
+                </lang>
+                <reference>
+                    <field>lov_id</field>
+                    <tableName>hpfm_lov</tableName>
+                    <columnName>lov_id</columnName>
+                </reference>
+            </table>
+            <table name="hpfm_lov_view_line" description="值集查询视图行表">
+                <sql>select view_line_id,
+                    view_header_id,
+                    tenant_id,
+                    lov_id,
+                    display,
+                    order_seq,
+                    field_name,
+                    query_field_flag,
+                    table_field_flag,
+                    table_field_width,
+                    enabled_flag
+                    from hpfm_lov_view_line
+                    where view_header_id in (select view_header_id from hpfm_lov_view_header WHERE view_code like 'HEXL%')
+                </sql>
+                <id>view_line_id</id>
+                <cited>view_line_id</cited>
+                <unique>view_header_id,tenant_id,lov_id,display,order_seq,field_name</unique>
+                <lang>
+                    <field>display</field>
+                    <pkName>view_line_id</pkName>
+                </lang>
+                <reference>
+                    <field>view_header_id</field>
+                    <tableName>hpfm_lov_view_header</tableName>
+                    <columnName>view_header_id</columnName>
+                </reference>
+                <reference>
+                    <field>lov_id</field>
+                    <tableName>hpfm_lov</tableName>
+                    <columnName>lov_id</columnName>
+                </reference>
+            </table>
+        </sheet>
+    </excel>
+</service>

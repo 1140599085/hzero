@@ -1,0 +1,179 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<service name="hzero-platform" order="10" description="IAM服务">
+    <excel name="hzero-iam-user-role" description="用户角色数据" fileName="hzero-iam-user-role"
+            schema="hzero_platform">
+        <sheet name="hzero-iam-user" description="用户">
+            <table name="iam_user" description="用户">
+                <sql>SELECT
+                        id,
+                        login_name,
+                        email,
+                        organization_id,
+                        HASH_PASSWORD,
+                        real_name,
+                        phone,
+                        INTERNATIONAL_TEL_CODE,
+                        image_url,
+                        profile_photo,
+                        LANGUAGE,
+                        time_zone,
+                        last_password_updated_at,
+                        last_login_at,
+                        is_enabled,
+                        is_locked,
+                        is_ldap,
+                        is_admin,
+                        locked_until_at,
+                        password_attempt,
+                        user_type
+                    FROM
+                        iam_user
+                    WHERE
+                        organization_id = 0
+                        AND is_enabled =1
+                        and real_name not like 'test%'
+                        and real_name not like 'TEST%'
+                        and real_name not like '%测试%'
+                </sql>
+                <id>id</id>
+                <cited>id</cited>
+                <unique>login_name,email</unique>
+            </table>
+            <table name="hiam_user_info" description="用户信息">
+                <sql>SELECT
+                        user_id,
+                        company_name,
+                        invitation_code,
+                        employee_id,
+                        text_id,
+                        security_level_code,
+                        start_date_active,
+                        end_date_active,
+                        user_source,
+                        phone_check_flag,
+                        email_check_flag,
+                        password_reset_flag,
+                        default_tenant_id,
+                        locked_date,
+                        date_format,
+                        time_format,
+                        birthday,
+                        nickname,
+                        gender,
+                        country_id,
+                        region_id,
+                        address_detail
+                    FROM
+                        hiam_user_info
+                    WHERE
+                        (company_name not like '测试%' and company_name not like 'TEST%' or company_name is null)
+                        and user_id IN (
+                        SELECT
+                        id
+                        FROM iam_user
+                        WHERE
+                        organization_id = 0
+                        AND is_enabled = 1
+                        AND real_name NOT LIKE 'test%'
+                        AND real_name NOT LIKE 'TEST%'
+                        AND real_name NOT LIKE '%测试%'
+                        )
+                </sql>
+                <unique>user_id</unique>
+                <reference>
+                    <field>user_id</field>
+                    <tableName>iam_user</tableName>
+                    <columnName>id</columnName>
+                </reference>
+            </table>
+        </sheet>
+        <sheet name="hzero-iam-role" description="角色">
+            <table name="iam_role" description="角色">
+                <sql>SELECT
+                        id,
+                        NAME,
+                        CODE,
+                        description,
+                        fd_level,
+                        h_tenant_id,
+                        h_inherit_role_id,
+                        h_parent_role_id,
+                        h_parent_role_assign_level,
+                        h_parent_role_assign_level_val,
+                        is_enabled,
+                        is_modified,
+                        is_enable_forbidden,
+                        is_built_in,
+                        is_assignable,
+                        h_level_path,
+                        h_inherit_level_path,
+                        created_by_tenant_id
+                    FROM
+                        iam_role
+                    WHERE
+                        h_tenant_id = 0
+                        AND is_enabled = 1
+                        AND NAME NOT LIKE 'test%'
+                        AND NAME NOT LIKE 'TEST%'
+                        AND NAME NOT LIKE '%测试%'
+                        AND CODE not like 'test%'
+                </sql>
+                <id>id</id>
+                <cited>id</cited>
+                <unique>
+                    code,h_tenant_id,h_parent_role_id,h_parent_role_assign_level,h_parent_role_assign_level_val,created_by_tenant_id
+                </unique>
+                <lang>
+                    <field>name</field>
+                    <pkName>id</pkName>
+                </lang>
+            </table>
+        </sheet>
+        <sheet name="hzero-iam-member-role" description="用户角色关系">
+            <table name="iam_member_role" description="用户角色关系">
+                <sql>SELECT
+                        id,
+                        role_id,
+                        member_id,
+                        member_type,
+                        source_id,
+                        source_type,
+                        h_assign_level,
+                        h_assign_level_value
+                    FROM iam_member_role
+                </sql>
+                <id>id</id>
+                <unique>role_id,member_id,member_type</unique>
+                <reference>
+                    <field>role_id</field>
+                    <sheetName>hzero-iam-role</sheetName>
+                    <tableName>iam_role</tableName>
+                    <columnName>id</columnName>
+                </reference>
+                <reference>
+                    <field>member_id</field>
+                    <sheetName>hzero-iam-user</sheetName>
+                    <tableName>iam_user</tableName>
+                    <columnName>id</columnName>
+                </reference>
+            </table>
+        </sheet>
+    </excel>
+    <excel name="hzero-ui-permission" description="UI权限数据" fileName="hzero-ui-permission" schema="hzero_platform">
+        <sheet name="hzero-ui-permission" description="UI权限组件数据">
+            <table name="hiam_ui_permission_comp" description="UI权限组件数据">
+                <sql>SELECT
+                        ui_permission_comp_id,
+                        page_route,
+                        permission_code,
+                        permission_name,
+                        permission_type
+                    FROM hiam_ui_permission_comp
+                </sql>
+                <id>ui_permission_comp_id</id>
+                <cited>ui_permission_comp_id</cited>
+                <unique>page_route,permission_code</unique>
+            </table>
+        </sheet>
+    </excel>
+</service>

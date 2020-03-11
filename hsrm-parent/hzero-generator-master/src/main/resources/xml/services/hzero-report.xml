@@ -1,0 +1,378 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<service name="hzero-report" order="50" description="报表服务">
+    <excel name="hzero-data-report" description="报表服务数据" fileName="hzero-report" schema="hzero_report">
+        <sheet name="hzero-report-dataset" description="数据集">
+            <table name="hrpt_dataset" description="数据集表">
+                <sql>select dataset_id,
+                    dataset_code,
+                    dataset_name,
+                    datasource_code,
+                    sql_text,
+                    query_params,
+                    meta_columns,
+                    sql_type,
+                    enabled_flag,
+                    remark,
+                    tenant_id
+                    from hrpt_dataset
+                </sql>
+                <id>dataset_id</id>
+                <cited>dataset_id</cited>
+            </table>
+        </sheet>
+        <sheet name="hzero-report" description="报表定义">
+            <table name="hrpt_report" description="报表">
+                <sql>select report_id,
+                    report_uuid,
+                    report_type_code,
+                    report_code,
+                    report_name,
+                    dataset_id,
+                    meta_columns,
+                    options,
+                    template_type_code,
+                    page_flag,
+                    limit_rows,
+                    enabled_flag,
+                    order_seq,
+                    remark,
+                    tenant_id
+                    from hrpt_report
+                </sql>
+                <id>report_id</id>
+                <cited>report_id</cited>
+                <unique>report_code,tenant_id</unique>
+                <reference>
+                    <field>report_id</field>
+                    <tableName>hrpt_dataset</tableName>
+                    <columnName>dataset_id</columnName>
+                </reference>
+            </table>
+            <table name="hrpt_report_permission" description="报表权限">
+                <sql>select permission_id,
+                    report_id,
+                    tenant_id,
+                    role_id,
+                    start_date,
+                    end_date,
+                    remark
+                    from hrpt_report_permission
+                </sql>
+                <id>permission_id</id>
+                <unique>report_id,role_id,tenant_id</unique>
+                <reference>
+                    <field>report_id</field>
+                    <tableName>hrpt_report</tableName>
+                    <columnName>report_id</columnName>
+                </reference>
+            </table>
+        </sheet>
+        <sheet name="hzero-report-template" description="报表模板">
+            <table name="hrpt_template" description="报表模板">
+                <sql>select template_id,
+                    template_type_code,
+                    template_code,
+                    template_name,
+                    enabled_flag,
+                    remark,
+                    tenant_id
+                    from hrpt_template
+                </sql>
+                <id>template_id</id>
+                <cited>template_id</cited>
+                <unique>template_code,tenant_id</unique>
+            </table>
+            <table name="hrpt_template_dtl" description="报表模板明细">
+                <sql>select template_dtl_id,
+                    template_id,
+                    template_url,
+                    template_content,
+                    lang,
+                    enabled_flag,
+                    tenant_id
+                    from hrpt_template_dtl
+                </sql>
+                <id>template_dtl_id</id>
+                <unique>template_id,lang</unique>
+                <reference>
+                    <field>template_id</field>
+                    <tableName>hrpt_template</tableName>
+                    <columnName>template_id</columnName>
+                </reference>
+            </table>
+        </sheet>
+        <sheet name="hzero-report-relevance" description="报表模板关联">
+            <table name="hrpt_report_template" description="报表模板关系">
+                <sql>select report_template_id,
+                    report_id,
+                    template_id,
+                    default_flag,
+                    tenant_id
+                    from hrpt_report_template
+                </sql>
+                <id>report_template_id</id>
+                <unique>report_id,template_id</unique>
+                <reference>
+                    <field>report_id</field>
+                    <sheetName>报表定义</sheetName>
+                    <tableName>hrpt_report</tableName>
+                    <columnName>report_id</columnName>
+                </reference>
+                <reference>
+                    <field>template_id</field>
+                    <sheetName>报表模板</sheetName>
+                    <tableName>hrpt_template</tableName>
+                    <columnName>template_id</columnName>
+                </reference>
+            </table>
+        </sheet>
+    </excel>
+    <excel name="hzero-iam-menu" description="菜单数据" fileName="hzero-iam-menu" schema="hzero_platform">
+        <sheet name="iam-menu-saas" description="报表服务菜单SAAS版">
+            <table name="iam_menu" description="报表服务菜单-saas">
+                <sql>select id,
+                    code,
+                    name,
+                    h_quick_index,
+                    fd_level,
+                    parent_id,
+                    type,
+                    sort,
+                    is_default,
+                    icon,
+                    route,
+                    h_custom_flag,
+                    h_tenant_id,
+                    h_level_path,
+                    h_virtual_flag,
+                    h_controller_type,
+                    h_permission_type,
+                    h_description,
+                    h_enabled_flag,
+                    CATEGORY
+                    from iam_menu
+                    where code like 'hzero.site.report%' or code like 'hzero.report%'
+                </sql>
+                <id>id</id>
+                <cited>id</cited>
+                <unique>code,fd_level,h_tenant_id</unique>
+                <lang>
+                    <field>name</field>
+                    <pkName>id</pkName>
+                </lang>
+                <reference>
+                    <field>parent_id</field>
+                    <tableName>iam_menu</tableName>
+                    <columnName>id</columnName>
+                </reference>
+            </table>
+            <table name="iam_menu_permission" description="报表服务菜单权限-saas">
+                <sql>select id,menu_id,permission_code
+                    from iam_menu_permission
+                    where menu_id IN ( SELECT id FROM iam_menu im
+                    where code like 'hzero.site.report%' or code like 'hzero.report%' )
+                </sql>
+                <id>id</id>
+                <cited>id</cited>
+                <unique>permission_code</unique>
+                <reference>
+                    <field>menu_id</field>
+                    <tableName>iam_menu</tableName>
+                    <columnName>id</columnName>
+                </reference>
+            </table>
+        </sheet>
+        <sheet name="iam-menu-op" description="报表服务菜单OP版">
+            <table name="iam_menu" description="报表服务菜单-op">
+                <sql>select id,
+                    code,
+                    name,
+                    h_quick_index,
+                    fd_level,
+                    parent_id,
+                    type,
+                    sort,
+                    is_default,
+                    icon,
+                    route,
+                    h_custom_flag,
+                    h_tenant_id,
+                    h_level_path,
+                    h_virtual_flag,
+                    h_controller_type,
+                    h_permission_type,
+                    h_description,
+                    h_enabled_flag,
+                    CATEGORY
+                    from iam_menu
+                    where code like 'hzero.report%'
+                </sql>
+                <id>id</id>
+                <cited>id</cited>
+                <unique>code,fd_level,h_tenant_id</unique>
+                <lang>
+                    <field>name</field>
+                    <pkName>id</pkName>
+                </lang>
+                <reference>
+                    <field>parent_id</field>
+                    <tableName>iam_menu</tableName>
+                    <columnName>id</columnName>
+                </reference>
+            </table>
+            <table name="iam_menu_permission" description="报表服务菜单权限-op">
+                <!--sql语句，包含需要查询的字段和where条件，主表别名为 t -->
+                <sql>select id,menu_id,permission_code
+                    from iam_menu_permission
+                    where menu_id IN ( SELECT id FROM iam_menu im
+                    where code like 'hzero.report%' )
+                </sql>
+                <id>id</id>
+                <cited>id</cited>
+                <unique>permission_code</unique>
+                <reference>
+                    <field>menu_id</field>
+                    <tableName>iam_menu</tableName>
+                    <columnName>id</columnName>
+                </reference>
+            </table>
+        </sheet>
+    </excel>
+    <excel name="hzero-platform-lov" description="值集数据" fileName="hzero-platform-lov" schema="hzero_platform">
+        <sheet name="lov" description="值集数据">
+            <table name="hpfm_lov" description="LOV表">
+                <sql>select lov_id,
+                    lov_code,
+                    lov_type_code,
+                    route_name,
+                    lov_name,
+                    description,
+                    tenant_id,
+                    parent_lov_code,
+                    parent_tenant_id,
+                    custom_sql,
+                    custom_url,
+                    value_field,
+                    display_field,
+                    must_page_flag,
+                    enabled_flag,
+                    translation_sql
+                    from hpfm_lov
+                    where lov_code like 'HRPT%' and enabled_flag=1
+                </sql>
+                <id>lov_id</id>
+                <cited>lov_id</cited>
+                <unique>lov_code,tenant_id</unique>
+                <lang>
+                    <field>lov_name</field>
+                    <pkName>lov_id</pkName>
+                </lang>
+                <lang>
+                    <field>description</field>
+                    <pkName>lov_id</pkName>
+                </lang>
+            </table>
+            <table name="hpfm_lov_value" description="LOV独立值集表">
+                <sql>select lov_value_id,
+                    lov_id,
+                    lov_code,
+                    value,
+                    meaning,
+                    description,
+                    tenant_id,
+                    tag,
+                    order_seq,
+                    parent_value,
+                    start_date_active,
+                    end_date_active,
+                    enabled_flag
+                    from hpfm_lov_value
+                    where lov_code like 'HRPT%' and enabled_flag=1
+                </sql>
+                <id>lov_value_id</id>
+                <unique>lov_id,value,tenant_id,parent_value</unique>
+                <lang>
+                    <field>meaning</field>
+                    <pkName>lov_value_id</pkName>
+                </lang>
+                <lang>
+                    <field>description</field>
+                    <pkName>lov_value_id</pkName>
+                </lang>
+                <reference>
+                    <field>lov_id</field>
+                    <tableName>hpfm_lov</tableName>
+                    <columnName>lov_id</columnName>
+                </reference>
+            </table>
+            <table name="hpfm_lov_view_header" description="值集查询视图头表">
+                <sql>select view_header_id,
+                    view_code,
+                    view_name,
+                    lov_id,
+                    tenant_id,
+                    value_field,
+                    display_field,
+                    title,
+                    width,
+                    height,
+                    page_size,
+                    delay_load_flag,
+                    children_field_name,
+                    enabled_flag
+                    from hpfm_lov_view_header
+                    where view_code like 'HRPT%' and enabled_flag=1
+                </sql>
+                <id>view_header_id</id>
+                <cited>view_header_id</cited>
+                <unique>view_code,tenant_id</unique>
+                <lang>
+                    <field>view_name</field>
+                    <pkName>view_header_id</pkName>
+                </lang>
+                <lang>
+                    <field>title</field>
+                    <pkName>view_header_id</pkName>
+                </lang>
+                <reference>
+                    <field>lov_id</field>
+                    <tableName>hpfm_lov</tableName>
+                    <columnName>lov_id</columnName>
+                </reference>
+            </table>
+            <table name="hpfm_lov_view_line" description="值集查询视图行表">
+                <sql>select view_line_id,
+                    view_header_id,
+                    tenant_id,
+                    lov_id,
+                    display,
+                    order_seq,
+                    field_name,
+                    query_field_flag,
+                    table_field_flag,
+                    table_field_width,
+                    enabled_flag
+                    from hpfm_lov_view_line
+                    where view_header_id in (select view_header_id from hpfm_lov_view_header WHERE view_code like 'HRPT%')
+                </sql>
+                <id>view_line_id</id>
+                <cited>view_line_id</cited>
+                <unique>view_header_id,tenant_id,lov_id,display,order_seq,field_name</unique>
+                <lang>
+                    <field>display</field>
+                    <pkName>view_line_id</pkName>
+                </lang>
+                <reference>
+                    <field>view_header_id</field>
+                    <tableName>hpfm_lov_view_header</tableName>
+                    <columnName>view_header_id</columnName>
+                </reference>
+                <reference>
+                    <field>lov_id</field>
+                    <tableName>hpfm_lov</tableName>
+                    <columnName>lov_id</columnName>
+                </reference>
+            </table>
+        </sheet>
+    </excel>
+</service>

@@ -1,0 +1,395 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--name：服务名，order：排序，description：描述-->
+<service name="hzero-message" order="20" description="消息服务">
+    <!--name：模块名称，description：描述，fileName：文件名，schema：数据库-->
+    <excel name="hzero-data-message" description="消息数据" fileName="hzero-message" schema="hzero_message">
+        <!--name：名称，description：页面显示名称和Excel页名称-->
+        <sheet name="hzero-message-email" description="邮箱服务配置">
+            <!--name：表名，description：描述-->
+            <table name="hmsg_email_server" description="邮箱服务配置">
+                <!--sql语句，包含需要查询的字段和where条件，主表别名为t-->
+                <sql>select
+                    server_id,server_code,server_name,host,port,protocol,try_times,username,password_encrypted,sender,enabled_flag,filter_strategy,tenant_id
+                    from hmsg_email_server where enabled_flag = 1
+                </sql>
+                <!--自增主键-->
+                <id>server_id</id>
+                <!--引用字段-->
+                <cited>server_id</cited>
+                <!--唯一性索引-->
+                <unique>server_code,tenant_id</unique>
+            </table>
+            <table name="hmsg_email_property" description="邮箱服务配置">
+                <sql>select property_id,server_id,property_code,property_value,tenant_id from hmsg_email_property
+                    where 1 = 1
+                </sql>
+                <id>property_id</id>
+                <unique>server_id,property_code,tenant_id</unique>
+                <!--field：关联列，tableName：关联的表，columnName：关联的列-->
+                <reference>
+                    <field>server_id</field>
+                    <tableName>hmsg_email_server</tableName>
+                    <columnName>server_id</columnName>
+                </reference>
+            </table>
+        </sheet>
+        <sheet name="hzero-message-sms" description="短信服务配置">
+            <table name="hmsg_sms_server" description="短信服务配置">
+                <sql>select
+                    server_id,server_code,server_name,server_type_code,end_point,access_key,access_key_secret,sign_name,enabled_flag,tenant_id
+                    from hmsg_sms_server where enabled_flag = 1 and access_key != '' and access_key_secret != ''
+                </sql>
+                <id>server_id</id>
+                <cited>server_id</cited>
+                <unique>server_code,tenant_id</unique>
+            </table>
+        </sheet>
+        <sheet name="hzero-message-template" description="消息模板">
+            <table name="hmsg_message_template" description="消息模板">
+                <sql>select
+                    template_id,template_code,template_name,template_title,template_content,message_category_code,message_subcategory_code,external_code,sql_value,lang,enabled_flag,tenant_id
+                    from hmsg_message_template where enabled_flag=1
+                </sql>
+                <id>template_id</id>
+                <cited>template_id</cited>
+                <unique>template_code,lang,tenant_id</unique>
+            </table>
+            <table name="hmsg_template_arg" description="消息模板">
+                <sql>select arg_id,template_id,arg_name,description from hmsg_template_arg where 1=1</sql>
+                <id>arg_id</id>
+                <unique>template_id,arg_name</unique>
+                <!--多语言，field：多语言列，pkName：关联主键-->
+                <lang>
+                    <field>description</field>
+                    <pkName>arg_id</pkName>
+                </lang>
+                <reference>
+                    <field>template_id</field>
+                    <tableName>hmsg_message_template</tableName>
+                    <columnName>template_id</columnName>
+                </reference>
+            </table>
+        </sheet>
+        <sheet name="hzero-message-config" description="接收配置">
+            <table name="hmsg_receive_config" description="接收配置">
+                <sql>select
+                    receive_id,receive_code,receive_name,default_receive_type,parent_receive_id,tenant_id,level_number
+                    from hmsg_receive_config where 1=1
+                </sql>
+                <id>receive_id</id>
+                <cited>receive_id</cited>
+                <unique>receive_code,tenant_id</unique>
+                <lang>
+                    <field>receive_name</field>
+                    <pkName>receive_id</pkName>
+                </lang>
+                <reference>
+                    <field>parent_receive_id</field>
+                    <tableName>hmsg_receive_config</tableName>
+                    <columnName>receive_id</columnName>
+                </reference>
+            </table>
+        </sheet>
+        <sheet name="hzero-message-type" description="接收组">
+            <table name="hmsg_receiver_type" description="接收组">
+                <sql>select
+                    receiver_type_id,type_code,type_name,type_mode_code,route_name,api_url,enabled_flag,tenant_id
+                    from hmsg_receive_config where enabled_flag=1
+                </sql>
+                <id>receiver_type_id</id>
+                <unique>type_code,tenant_id</unique>
+            </table>
+        </sheet>
+        <sheet name="hzero-message-server" description="发送配置">
+            <table name="hmsg_template_server" description="发送配置">
+                <sql>select temp_server_id,tenant_id,message_code,message_name,enabled_flag from
+                    hmsg_template_server where enabled_flag=1
+                </sql>
+                <id>temp_server_id</id>
+                <cited>temp_server_id</cited>
+                <unique>tenant_id,message_code</unique>
+            </table>
+            <table name="hmsg_template_server_line" description="发送配置">
+                <sql>select temp_server_line_id,temp_server_id,type_code,template_code,server_id,remark from
+                    hmsg_template_server_line where 1=1
+                </sql>
+                <id>temp_server_line_id</id>
+                <cited>temp_server_line_id</cited>
+                <unique>temp_server_id,type_code</unique>
+                <reference>
+                    <field>temp_server_id</field>
+                    <tableName>hmsg_template_server</tableName>
+                    <columnName>temp_server_id</columnName>
+                </reference>
+            </table>
+        </sheet>
+        <sheet name="hzero-message-wechat_enterprise" description="微信企业号配置">
+            <table name="hmsg_wechat_enterprise" description="微信企业号配置">
+                <sql>select
+                    server_id,server_code,server_name,auth_type,corpid,corpsecret,auth_address,callback_url,enabled_flag,tenant_id
+                    from hmsg_wechat_enterprise where enabled_flag=1
+                </sql>
+                <id>server_id</id>
+                <unique>server_code,tenant_id</unique>
+            </table>
+        </sheet>
+        <sheet name="hzero-message-wechat_official" description="微信公众号配置">
+            <table name="hmsg_wechat_official" description="微信公众号配置">
+                <sql>select
+                    server_id,server_code,server_name,auth_type,appid,secret,auth_address,enabled_flag,tenant_id
+                    from hmsg_wechat_official where enabled_flag=1
+                </sql>
+                <id>server_id</id>
+                <unique>server_code,tenant_id</unique>
+            </table>
+        </sheet>
+    </excel>
+    <excel name="hzero-iam-menu" description="菜单数据" fileName="hzero-iam-menu" schema="hzero_platform">
+        <sheet name="iam-menu-saas" description="消息服务菜单SAAS版">
+            <table name="iam_menu" description="消息服务菜单-saas">
+                <sql>select id,
+                    code,
+                    name,
+                    h_quick_index,
+                    fd_level,
+                    parent_id,
+                    type,
+                    sort,
+                    is_default,
+                    icon,
+                    route,
+                    h_custom_flag,
+                    h_tenant_id,
+                    h_level_path,
+                    h_virtual_flag,
+                    h_controller_type,
+                    h_permission_type,
+                    h_description,
+                    h_enabled_flag,
+                    CATEGORY
+                    from iam_menu
+                    where code like 'hzero.site.msg%' or code like 'hzero.msg%' and h_enabled_flag=1
+                </sql>
+                <id>id</id>
+                <cited>id</cited>
+                <unique>code,fd_level,h_tenant_id</unique>
+                <lang>
+                    <field>name</field>
+                    <pkName>id</pkName>
+                </lang>
+                <reference>
+                    <field>parent_id</field>
+                    <tableName>iam_menu</tableName>
+                    <columnName>id</columnName>
+                </reference>
+            </table>
+            <table name="iam_menu_permission" description="消息服务菜单权限-saas">
+                <sql>select id,menu_id,permission_code
+                    from iam_menu_permission
+                    where menu_id IN ( SELECT id FROM iam_menu im
+                    where code like 'hzero.site.msg%' or code like 'hzero.msg%' )
+                </sql>
+                <id>id</id>
+                <cited>id</cited>
+                <unique>menu_id,permission_code</unique>
+                <reference>
+                    <field>menu_id</field>
+                    <tableName>iam_menu</tableName>
+                    <columnName>id</columnName>
+                </reference>
+            </table>
+        </sheet>
+        <sheet name="iam-menu-op" description="消息服务菜单OP版">
+            <table name="iam_menu" description="消息服务菜单-op">
+                <sql>select id,
+                    code,
+                    name,
+                    h_quick_index,
+                    fd_level,
+                    parent_id,
+                    type,
+                    sort,
+                    is_default,
+                    icon,
+                    route,
+                    h_custom_flag,
+                    h_tenant_id,
+                    h_level_path,
+                    h_virtual_flag,
+                    h_controller_type,
+                    h_permission_type,
+                    h_description,
+                    h_enabled_flag,
+                    CATEGORY
+                    from iam_menu
+                    where code like 'hzero.msg%' and h_enabled_flag=1
+                </sql>
+                <id>id</id>
+                <cited>id</cited>
+                <unique>code,fd_level,h_tenant_id</unique>
+                <lang>
+                    <field>name</field>
+                    <pkName>id</pkName>
+                </lang>
+                <reference>
+                    <field>parent_id</field>
+                    <tableName>iam_menu</tableName>
+                    <columnName>id</columnName>
+                </reference>
+            </table>
+            <table name="iam_menu_permission" description="消息服务菜单权限-op">
+                <!--sql语句，包含需要查询的字段和where条件，主表别名为 t -->
+                <sql>select id,menu_id,permission_code
+                    from iam_menu_permission
+                    where menu_id IN ( SELECT id FROM iam_menu im
+                    where code like 'hzero.msg%' )
+                </sql>
+                <id>id</id>
+                <cited>id</cited>
+                <unique>menu_id,permission_code</unique>
+                <reference>
+                    <field>menu_id</field>
+                    <tableName>iam_menu</tableName>
+                    <columnName>id</columnName>
+                </reference>
+            </table>
+        </sheet>
+    </excel>
+    <excel name="hzero-platform-lov" description="值集数据" fileName="hzero-platform-lov" schema="hzero_platform">
+        <sheet name="lov" description="值集数据">
+            <table name="hpfm_lov" description="LOV表">
+                <sql>select lov_id,
+                    lov_code,
+                    lov_type_code,
+                    route_name,
+                    lov_name,
+                    description,
+                    tenant_id,
+                    parent_lov_code,
+                    parent_tenant_id,
+                    custom_sql,
+                    custom_url,
+                    value_field,
+                    display_field,
+                    must_page_flag,
+                    enabled_flag,
+                    translation_sql
+                    from hpfm_lov
+                    where lov_code like 'HMSG%' and enabled_flag=1
+                </sql>
+                <id>lov_id</id>
+                <cited>lov_id</cited>
+                <unique>lov_code,tenant_id</unique>
+                <lang>
+                    <field>lov_name</field>
+                    <pkName>lov_id</pkName>
+                </lang>
+                <lang>
+                    <field>description</field>
+                    <pkName>lov_id</pkName>
+                </lang>
+            </table>
+            <table name="hpfm_lov_value" description="LOV独立值集表">
+                <sql>select lov_value_id,
+                    lov_id,
+                    lov_code,
+                    value,
+                    meaning,
+                    description,
+                    tenant_id,
+                    tag,
+                    order_seq,
+                    parent_value,
+                    start_date_active,
+                    end_date_active,
+                    enabled_flag
+                    from hpfm_lov_value
+                    where lov_code like 'HMSG%' and enabled_flag=1
+                </sql>
+                <id>lov_value_id</id>
+                <unique>lov_id,value,tenant_id,parent_value</unique>
+                <lang>
+                    <field>meaning</field>
+                    <pkName>lov_value_id</pkName>
+                </lang>
+                <lang>
+                    <field>description</field>
+                    <pkName>lov_value_id</pkName>
+                </lang>
+                <reference>
+                    <field>lov_id</field>
+                    <tableName>hpfm_lov</tableName>
+                    <columnName>lov_id</columnName>
+                </reference>
+            </table>
+            <table name="hpfm_lov_view_header" description="值集查询视图头表">
+                <sql>select view_header_id,
+                    view_code,
+                    view_name,
+                    lov_id,
+                    tenant_id,
+                    value_field,
+                    display_field,
+                    title,
+                    width,
+                    height,
+                    page_size,
+                    delay_load_flag,
+                    children_field_name,
+                    enabled_flag
+                    from hpfm_lov_view_header
+                    where view_code like 'HMSG%' and enabled_flag=1
+                </sql>
+                <id>view_header_id</id>
+                <cited>view_header_id</cited>
+                <unique>view_code,tenant_id</unique>
+                <lang>
+                    <field>view_name</field>
+                    <pkName>view_header_id</pkName>
+                </lang>
+                <lang>
+                    <field>title</field>
+                    <pkName>view_header_id</pkName>
+                </lang>
+                <reference>
+                    <field>lov_id</field>
+                    <tableName>hpfm_lov</tableName>
+                    <columnName>lov_id</columnName>
+                </reference>
+            </table>
+            <table name="hpfm_lov_view_line" description="值集查询视图行表">
+                <sql>select view_line_id,
+                    view_header_id,
+                    tenant_id,
+                    lov_id,
+                    display,
+                    order_seq,
+                    field_name,
+                    query_field_flag,
+                    table_field_flag,
+                    table_field_width,
+                    enabled_flag
+                    from hpfm_lov_view_line
+                    where view_header_id in (select view_header_id from hpfm_lov_view_header WHERE view_code like 'HMSG%')
+                </sql>
+                <id>view_line_id</id>
+                <cited>view_line_id</cited>
+                <unique>view_header_id,tenant_id,lov_id,display,order_seq,field_name</unique>
+                <lang>
+                    <field>display</field>
+                    <pkName>view_line_id</pkName>
+                </lang>
+                <reference>
+                    <field>view_header_id</field>
+                    <tableName>hpfm_lov_view_header</tableName>
+                    <columnName>view_header_id</columnName>
+                </reference>
+                <reference>
+                    <field>lov_id</field>
+                    <tableName>hpfm_lov</tableName>
+                    <columnName>lov_id</columnName>
+                </reference>
+            </table>
+        </sheet>
+    </excel>
+</service>

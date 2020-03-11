@@ -1,0 +1,1218 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--name：服务名，order：排序，description：描述-->
+<service name="hzero-platform" order="1" description="平台服务">
+    <!--name：模块名称，description：描述，fileName：文件名，schema：数据库-->
+    <excel name="hzero-iam-menu" description="菜单数据" fileName="hzero-iam-menu" schema="hzero_platform">
+        <sheet name="iam-menu-saas" description="基础菜单SAAS版">
+            <table name="iam_menu" description="菜单-saas">
+                <sql>SELECT
+                        id,
+                        CODE,
+                        NAME,
+                        h_quick_index,
+                        fd_level,
+                        parent_id,
+                        type,
+                        sort,
+                        is_default,
+                        icon,
+                        route,
+                        h_custom_flag,
+                        h_tenant_id,
+                        h_level_path,
+                        h_virtual_flag,
+                        h_controller_type,
+                        h_permission_type,
+                        h_description,
+                        h_enabled_flag,
+                        CATEGORY
+                    FROM
+                        iam_menu
+                    WHERE
+                        EXISTS (
+                        SELECT
+                        1
+                        FROM
+                        iam_menu
+                        WHERE
+                        (
+                        CODE LIKE 'hzero.site.sys%'
+                        OR CODE LIKE 'hzero.site.dev%'
+                        OR CODE LIKE 'hzero.site.mdm%'
+                        OR CODE LIKE 'hzero.sys%'
+                        OR CODE LIKE 'hzero.organization%'
+                        OR CODE LIKE 'hzero.dev%'
+                        OR CODE LIKE 'hzero.mdm%'
+                        OR CODE LIKE 'hzero.personality%'
+                        )
+                        AND t.h_level_path LIKE concat( h_level_path, '%' ))
+                        AND t.h_tenant_id = 0
+                        AND t.CODE NOT LIKE '%test%'
+                        AND h_enabled_flag = 1
+                    ORDER BY
+                        t.h_level_path
+                </sql>
+                <id>id</id>
+                <cited>id</cited>
+                <unique>code,fd_level,h_tenant_id</unique>
+                <lang>
+                    <field>name</field>
+                    <pkName>id</pkName>
+                </lang>
+                <reference>
+                    <field>parent_id</field>
+                    <tableName>iam_menu</tableName>
+                    <columnName>id</columnName>
+                </reference>
+            </table>
+            <table name="iam_menu_permission" description="基础菜单权限-saas">
+                <sql>SELECT
+                        id,
+                        menu_id,
+                        permission_code
+                    FROM
+                        iam_menu_permission
+                    WHERE
+                        menu_id IN (
+                        SELECT
+                        id
+                        FROM
+                        iam_menu im
+                        WHERE
+                        im.h_tenant_id = 0
+                        AND EXISTS (
+                            SELECT
+                        1
+                        FROM
+                            iam_menu
+                        WHERE
+                            (
+                            CODE LIKE 'hzero.site.sys%'
+                            OR CODE LIKE 'hzero.site.dev%'
+                            OR CODE LIKE 'hzero.site.mdm%'
+                            OR CODE LIKE 'hzero.sys%'
+                            OR CODE LIKE 'hzero.organization%'
+                            OR CODE LIKE 'hzero.dev%'
+                            OR CODE LIKE 'hzero.mdm%'
+                            OR CODE LIKE 'hzero.personality%'
+                            )
+                            AND im.h_level_path LIKE concat( h_level_path, '%' )
+                            )
+                        )
+                    ORDER BY
+                    menu_id,
+                    permission_code
+                </sql>
+                <id>id</id>
+                <cited>id</cited>
+                <unique>menu_id,permission_code</unique>
+                <reference>
+                    <field>menu_id</field>
+                    <tableName>iam_menu</tableName>
+                    <columnName>id</columnName>
+                </reference>
+            </table>
+        </sheet>
+        <sheet name="iam-menu-op" description="基础菜单OP版">
+            <table name="iam_menu" description="菜单-op">
+                <sql>SELECT
+                        id,
+                        CODE,
+                        NAME,
+                        h_quick_index,
+                        fd_level,
+                        parent_id,
+                        type,
+                        sort,
+                        is_default,
+                        icon,
+                        route,
+                        h_custom_flag,
+                        h_tenant_id,
+                        h_level_path,
+                        h_virtual_flag,
+                        h_controller_type,
+                        h_permission_type,
+                        h_description,
+                        h_enabled_flag,
+                        CATEGORY
+                    FROM
+                        iam_menu
+                    WHERE
+                        h_enabled_flag = 1
+                        AND EXISTS (
+                        SELECT
+                        1
+                        FROM
+                        iam_menu
+                        WHERE
+                        ( CODE LIKE 'hzero.sys%' OR CODE LIKE 'hzero.organization%' OR CODE LIKE 'hzero.dev%' OR CODE LIKE 'hzero.mdm%' OR CODE LIKE 'hzero.personality%' )
+                        AND t.h_level_path LIKE concat( h_level_path, '%' ))
+                        AND t.h_tenant_id = 0
+                        AND t.CODE NOT LIKE '%test%'
+                        AND ( fd_level = 'organization' )
+                    ORDER BY
+                        t.h_level_path
+                </sql>
+                <id>id</id>
+                <cited>id</cited>
+                <unique>code,fd_level,h_tenant_id</unique>
+                <lang>
+                    <field>name</field>
+                    <pkName>id</pkName>
+                </lang>
+                <reference>
+                    <field>parent_id</field>
+                    <tableName>iam_menu</tableName>
+                    <columnName>id</columnName>
+                </reference>
+            </table>
+            <table name="iam_menu_permission" description="基础菜单权限-op">
+                <!--sql语句，包含需要查询的字段和where条件，主表别名为 t -->
+                <sql>SELECT
+                        id,
+                        menu_id,
+                        permission_code
+                    FROM
+                        iam_menu_permission
+                    WHERE
+                        menu_id IN (
+                        SELECT
+                            id
+                        FROM
+                            iam_menu im
+                        WHERE
+                            im.h_tenant_id = 0
+                            AND ( fd_level = 'organization' )
+                            AND EXISTS (
+                            SELECT
+                            1
+                            FROM
+                            iam_menu
+                            WHERE
+                            ( CODE LIKE 'hzero.sys%' OR CODE LIKE 'hzero.organization%' OR CODE LIKE 'hzero.dev%' OR CODE LIKE 'hzero.mdm%' OR CODE LIKE 'hzero.personality%' )
+                            AND im.h_level_path LIKE concat( h_level_path, '%' )
+                            )
+                        )
+                    ORDER BY
+                        menu_id,
+                        permission_code
+                </sql>
+                <id>id</id>
+                <cited>id</cited>
+                <unique>menu_id,permission_code</unique>
+                <reference>
+                    <field>menu_id</field>
+                    <tableName>iam_menu</tableName>
+                    <columnName>id</columnName>
+                </reference>
+            </table>
+        </sheet>
+    </excel>
+    <excel name="hzero-platform-flex" description="弹性域数据" fileName="hzero-platform-flex" schema="hzero_platform">
+        <!--name：名称，description：页面显示名称和Excel页名称-->
+        <sheet name="prompt" description="弹性域">
+            <!--name：表名，description：描述-->
+            <table name="hpfm_flex_model" description="弹性域模型">
+                <!--sql语句，包含需要查询的字段和where条件，主表别名为 t -->
+                <sql>SELECT
+                        model_id,
+                        service_name,
+                        model_code,
+                        model_name,
+                        model_table,
+                        tenant_id,
+                        enabled_flag
+                    FROM
+                        hpfm_flex_model
+                    WHERE
+                        enabled_flag=1
+                        and tenant_id=0
+                        and model_code not like 'TEST%'
+                </sql>
+                <!--自增主键-->
+                <id>model_id</id>
+                <!--引用字段-->
+                <cited>model_id</cited>
+                <!--唯一性索引-->
+                <unique>model_code,tenant_id</unique>
+            </table>
+            <table name="hpfm_flex_model_field" description="弹性域模型字段">
+                <sql>SELECT
+                        model_field_id,
+                        model_id,
+                        field_name,
+                        description,
+                        field_type,
+                        value_source
+                    FROM
+                        hpfm_flex_model_field
+                    WHERE
+                        field_type != ''
+                </sql>
+                <id>model_field_id</id>
+                <cited>model_field_id</cited>
+                <unique>model_id,field_name</unique>
+                <reference>
+                    <field>model_id</field>
+                    <tableName>hpfm_flex_model</tableName>
+                    <columnName>model_id</columnName>
+                </reference>
+            </table>
+            <table name="hpfm_flex_rule" description="弹性域规则">
+                <sql>SELECT
+                        rule_id,
+                        model_id,
+                        rule_code,
+                        description,
+                        tenant_id,
+                        enabled_flag
+                    FROM
+                        hpfm_flex_rule
+                    WHERE
+                        enabled_flag = 1
+                        AND tenant_id =0
+                </sql>
+                <id>rule_id</id>
+                <cited>rule_id</cited>
+                <unique>rule_code,tenant_id</unique>
+                <reference>
+                    <field>model_id</field>
+                    <tableName>hpfm_flex_model</tableName>
+                    <columnName>model_id</columnName>
+                </reference>
+            </table>
+            <table name="hpfm_flex_rule_detail" description="弹性域规则明细">
+                <sql>SELECT
+                        rule_detail_id,
+                        description,
+                        enabled_flag,
+                        rule_id,
+                        tenant_id,
+                        scope,
+                        source_id
+                    FROM
+                        hpfm_flex_rule_detail
+                    WHERE
+                        enabled_flag = 1
+                        AND tenant_id =0
+                        and description not like '%测试%'
+                        and description not like 'TEST%'
+                        and description not like 'test%'
+                </sql>
+                <id>rule_detail_id</id>
+                <cited>rule_detail_id</cited>
+                <unique>rule_id,tenant_id</unique>
+                <reference>
+                    <field>rule_id</field>
+                    <tableName>hpfm_flex_rule</tableName>
+                    <columnName>rule_id</columnName>
+                </reference>
+            </table>
+            <table name="hpfm_flex_detail_field" description="弹性域规则明细字段">
+                <sql>SELECT
+                        detail_field_id,
+                        rule_detail_id,
+                        field_name,
+                        field_type,
+                        field_value,
+                        pre_symbol,
+                        operator,
+                        back_symbol
+                    FROM
+                        hpfm_flex_detail_field
+                    WHERE
+                        1 =1
+                </sql>
+                <id>detail_field_id</id>
+                <unique>rule_detail_id,field_name</unique>
+                <reference>
+                    <field>rule_detail_id</field>
+                    <tableName>hpfm_flex_rule_detail</tableName>
+                    <columnName>rule_detail_id</columnName>
+                </reference>
+            </table>
+            <table name="hpfm_flex_detail_config" description="弹性域规则明细配置">
+                <sql>SELECT
+                        detail_config_id,
+                        rule_detail_id,
+                        model_field_id,
+                        field_description,
+                        order_seq,
+                        field_column_number,
+                        field_column_width,
+                        field_type,
+                        value_source,
+                        readable_flag,
+                        required_flag
+                    FROM
+                        hpfm_flex_detail_config
+                    WHERE
+                        field_description not like '测试%'
+                </sql>
+                <id>detail_config_id</id>
+                <unique>rule_detail_id,model_field_id</unique>
+                <reference>
+                    <field>rule_detail_id</field>
+                    <tableName>hpfm_flex_rule_detail</tableName>
+                    <columnName>rule_detail_id</columnName>
+                </reference>
+                <reference>
+                    <field>model_field_id</field>
+                    <tableName>hpfm_flex_model_field</tableName>
+                    <columnName>model_field_id</columnName>
+                </reference>
+            </table>
+        </sheet>
+    </excel>
+    <excel name="hzero-platform-lov" description="值集数据" fileName="hzero-platform-lov" schema="hzero_platform">
+        <sheet name="lov" description="值集数据">
+            <table name="hpfm_lov" description="LOV表">
+                <sql>SELECT
+                        lov_id,
+                        lov_code,
+                        lov_type_code,
+                        route_name,
+                        lov_name,
+                        description,
+                        tenant_id,
+                        parent_lov_code,
+                        parent_tenant_id,
+                        custom_sql,
+                        custom_url,
+                        value_field,
+                        display_field,
+                        must_page_flag,
+                        enabled_flag,
+                        translation_sql
+                    FROM
+                        hpfm_lov
+                    WHERE
+                        enabled_flag = 1
+                        AND tenant_id =0
+                        and lov_code not like 'TEST%'
+                </sql>
+                <id>lov_id</id>
+                <cited>lov_id</cited>
+                <unique>lov_code,tenant_id</unique>
+                <lang>
+                    <field>lov_name</field>
+                    <pkName>lov_id</pkName>
+                </lang>
+                <lang>
+                    <field>description</field>
+                    <pkName>lov_id</pkName>
+                </lang>
+            </table>
+            <table name="hpfm_lov_value" description="LOV独立值集表">
+                <sql>SELECT
+                        lov_value_id,
+                        lov_id,
+                        lov_code,
+                        VALUE,
+                        meaning,
+                        description,
+                        tenant_id,
+                        tag,
+                        order_seq,
+                        parent_value,
+                        start_date_active,
+                        end_date_active,
+                        enabled_flag
+                    FROM
+                        hpfm_lov_value
+                    WHERE
+                        enabled_flag = 1
+                        and tenant_id =0
+                        and lov_code not like 'TEST%'
+                        and lov_code not like 'DEMO%'
+                </sql>
+                <id>lov_value_id</id>
+                <unique>lov_id,value,tenant_id,parent_value</unique>
+                <lang>
+                    <field>meaning</field>
+                    <pkName>lov_value_id</pkName>
+                </lang>
+                <lang>
+                    <field>description</field>
+                    <pkName>lov_value_id</pkName>
+                </lang>
+                <reference>
+                    <field>lov_id</field>
+                    <tableName>hpfm_lov</tableName>
+                    <columnName>lov_id</columnName>
+                </reference>
+            </table>
+            <table name="hpfm_lov_view_header" description="值集查询视图头表">
+                <sql>SELECT
+                        view_header_id,
+                        view_code,
+                        view_name,
+                        lov_id,
+                        tenant_id,
+                        value_field,
+                        display_field,
+                        title,
+                        width,
+                        height,
+                        page_size,
+                        delay_load_flag,
+                        children_field_name,
+                        enabled_flag
+                    FROM
+                        hpfm_lov_view_header
+                    WHERE
+                        enabled_flag=1
+                        and tenant_id=0
+                        and view_code not like 'TEST%'
+                </sql>
+                <id>view_header_id</id>
+                <cited>view_header_id</cited>
+                <unique>view_code,tenant_id</unique>
+                <lang>
+                    <field>view_name</field>
+                    <pkName>view_header_id</pkName>
+                </lang>
+                <lang>
+                    <field>title</field>
+                    <pkName>view_header_id</pkName>
+                </lang>
+                <reference>
+                    <field>lov_id</field>
+                    <tableName>hpfm_lov</tableName>
+                    <columnName>lov_id</columnName>
+                </reference>
+            </table>
+            <table name="hpfm_lov_view_line" description="值集查询视图行表">
+                <sql>SELECT
+                        view_line_id,
+                        view_header_id,
+                        tenant_id,
+                        lov_id,
+                        display,
+                        order_seq,
+                        field_name,
+                        query_field_flag,
+                        table_field_flag,
+                        table_field_width,
+                        enabled_flag
+                    FROM
+                        hpfm_lov_view_line
+                    WHERE
+                        enabled_flag=1
+                        and tenant_id=0
+                </sql>
+                <id>view_line_id</id>
+                <cited>view_line_id</cited>
+                <unique>view_header_id,tenant_id,lov_id,display,order_seq,field_name</unique>
+                <lang>
+                    <field>display</field>
+                    <pkName>view_line_id</pkName>
+                </lang>
+                <reference>
+                    <field>view_header_id</field>
+                    <tableName>hpfm_lov_view_header</tableName>
+                    <columnName>view_header_id</columnName>
+                </reference>
+                <reference>
+                    <field>lov_id</field>
+                    <tableName>hpfm_lov</tableName>
+                    <columnName>lov_id</columnName>
+                </reference>
+            </table>
+        </sheet>
+    </excel>
+    <excel name="hzero-platform-permission-range" description="数据权限" fileName="hzero-platform-permission-range"
+            schema="hzero_platform">
+        <sheet name="permission" description="屏蔽规则">
+            <table name="hpfm_permission_range" description="屏蔽范围">
+                <sql>SELECT
+                        range_id,
+                        custom_rule_flag,
+                        table_name,
+                        sql_id,
+                        description,
+                        tenant_id,
+                        service_name,
+                        enabled_flag
+                    FROM
+                        hpfm_permission_range
+                    WHERE
+                        enabled_flag = 1
+                        AND tenant_id = 0
+                        AND table_name NOT LIKE 'test%'
+                        AND (
+                        description NOT LIKE '%TEST%'
+                        OR description IS NULL)
+                </sql>
+                <id>range_id</id>
+                <cited>range_id</cited>
+                <unique>table_name,sql_id,tenant_id,service_name</unique>
+            </table>
+            <table name="hpfm_permission_rule" description="屏蔽规则">
+                <sql>SELECT
+                        rule_id,
+                        rule_code,
+                        rule_type_code,
+                        rule_name,
+                        description,
+                        sql_value,
+                        tenant_id,
+                        enabled_flag
+                    FROM
+                        hpfm_permission_rule
+                    WHERE
+                        enabled_flag = 1
+                        AND tenant_id =0
+                        and rule_name not like '%测试%'
+                </sql>
+                <id>rule_id</id>
+                <cited>rule_id</cited>
+                <unique>rule_code,tenant_id</unique>
+            </table>
+            <table name="hpfm_permission_rel" description="屏蔽范围规则关系">
+                <sql>SELECT
+                        permission_rel_id,
+                        range_id,
+                        rule_id
+                    FROM
+                        hpfm_permission_rel
+                    WHERE
+                        1 =1
+                </sql>
+                <id>permission_rel_id</id>
+                <cited>permission_rel_id</cited>
+                <unique>range_id,rule_id</unique>
+                <reference>
+                    <field>range_id</field>
+                    <tableName>hpfm_permission_range</tableName>
+                    <columnName>range_id</columnName>
+                </reference>
+                <reference>
+                    <field>rule_id</field>
+                    <tableName>hpfm_permission_rule</tableName>
+                    <columnName>rule_id</columnName>
+                </reference>
+            </table>
+        </sheet>
+    </excel>
+    <excel name="hzero-platform-datasource" description="数据源" fileName="hzero-platform-datasource"
+            schema="hzero_platform">
+        <sheet name="database" description="数据库数据源">
+            <table name="hpfm_datasource_driver" description="数据源驱动配置">
+                <sql>SELECT
+                        driver_id,
+                        driver_name,
+                        description,
+                        database_type,
+                        driver_version,
+                        driver_path,
+                        main_class,
+                        enabled_flag,
+                        tenant_id
+                    FROM
+                        hpfm_datasource_driver
+                    WHERE
+                        enabled_flag=1
+                        AND tenant_id=0
+                        AND driver_name not like 'TEST%'
+                        AND driver_name NOT LIKE '%测试%'
+                        AND driver_name not like 'demo%'
+                </sql>
+                <id>driver_id</id>
+                <cited>driver_id</cited>
+                <unique>database_type,driver_version,tenant_id</unique>
+            </table>
+            <table name="hpfm_datasource" description="数据源配置">
+                <sql>SELECT
+                        datasource_id,
+                        ds_purpose_code,
+                        db_type,
+                        datasource_code,
+                        description,
+                        driver_class,
+                        datasource_url,
+                        username,
+                        password_encrypted,
+                        db_pool_type,
+                        queryer_class,
+                        pool_class,
+                        OPTIONS,
+                        remark,
+                        enabled_flag,
+                        tenant_id,
+                        ext_config,
+                        driver_id
+                    FROM
+                        hpfm_datasource
+                    WHERE
+                        enabled_flag = 1
+                        AND tenant_id = 0
+                        AND datasource_code NOT LIKE 'TEST%'
+                        AND driver_id IN (
+                        SELECT
+                            driver_id
+                        FROM
+                            hpfm_datasource_driver
+                        WHERE
+                            enabled_flag = 1
+                            AND tenant_id = 0
+                            AND driver_name NOT LIKE 'TEST%'
+                            AND driver_name NOT LIKE '%测试%'
+                            AND driver_name NOT LIKE 'demo%')
+                </sql>
+                <id>datasource_id</id>
+                <cited>datasource_id</cited>
+                <unique>datasource_code,tenant_id</unique>
+                <reference>
+                    <field>driver_id</field>
+                    <tableName>hpfm_datasource_driver</tableName>
+                    <columnName>driver_id</columnName>
+                </reference>
+            </table>
+            <table name="hpfm_database" description="数据库">
+                <sql>SELECT
+                    database_id,
+                    database_code,
+                    database_name,
+                    datasource_id,
+                    table_prefix,
+                    public_flag,
+                    enabled_flag
+                    FROM
+                    hpfm_database
+                    WHERE
+                    enabled_flag=1
+                    and database_code not like 'TEST%'
+                    and database_code not like 'test%'
+                    and database_code not like 'demo%'
+                </sql>
+                <id>database_id</id>
+                <cited>database_id</cited>
+                <unique>database_code,datasource_id</unique>
+                <reference>
+                    <field>datasource_id</field>
+                    <tableName>hpfm_datasource</tableName>
+                    <columnName>datasource_id</columnName>
+                </reference>
+            </table>
+            <table name="hpfm_database_tenant" description="租户数据库关系">
+                <sql>SELECT
+                        database_tenant_id,
+                        database_id,
+                        datasource_id,
+                        tenant_id
+                    FROM
+                        hpfm_database_tenant
+                    WHERE
+                        tenant_id=0
+                </sql>
+                <id>database_tenant_id</id>
+                <unique>datasource_id,tenant_id</unique>
+                <reference>
+                    <field>database_id</field>
+                    <tableName>hpfm_database</tableName>
+                    <columnName>database_id</columnName>
+                </reference>
+                <reference>
+                    <field>datasource_id</field>
+                    <tableName>hpfm_datasource</tableName>
+                    <columnName>datasource_id</columnName>
+                </reference>
+            </table>
+            <table name="hpfm_datasource_service" description="数据源服务">
+                <sql>SELECT
+                        datasource_service_id,
+                        service_name,
+                        datasource_id
+                    FROM
+                        hpfm_datasource_service
+                    WHERE
+                        1=1
+                </sql>
+                <id>datasource_service_id</id>
+                <unique>service_name,datasource_id</unique>
+                <reference>
+                    <field>datasource_id</field>
+                    <tableName>hpfm_datasource</tableName>
+                    <columnName>datasource_id</columnName>
+                </reference>
+            </table>
+        </sheet>
+        <sheet name="form" description="动态表单配置">
+            <table name="hpfm_form_header" description="表单配置头">
+                <sql>SELECT
+                        form_header_id,
+                        form_code,
+                        form_name,
+                        form_group_code,
+                        form_description,
+                        enabled_flag,
+                        tenant_id
+                    FROM
+                        hpfm_form_header
+                    WHERE
+                        enabled_flag=1
+                        and tenant_id=0
+                        and form_code not like 'demo%'
+                </sql>
+                <id>form_header_id</id>
+                <cited>form_header_id</cited>
+                <unique>form_code,tenant_id</unique>
+                <lang>
+                    <field>form_name</field>
+                    <pkName>form_header_id</pkName>
+                </lang>
+                <lang>
+                    <field>form_description</field>
+                    <pkName>form_header_id</pkName>
+                </lang>
+            </table>
+            <table name="hpfm_form_line" description="表单配置行">
+                <sql>SELECT
+                        form_line_id,
+                        form_header_id,
+                        item_code,
+                        item_name,
+                        item_description,
+                        order_seq,
+                        item_type_code,
+                        required_flag,
+                        enabled_flag,
+                        default_value,
+                        tenant_id
+                    FROM
+                        hpfm_form_line
+                    WHERE
+                        enabled_flag = 1
+                        AND tenant_id =0
+                        and item_description not like '%测试%'
+                </sql>
+                <id>form_line_id</id>
+                <unique>form_header_id,item_code,tenant_id</unique>
+                <reference>
+                    <field>form_header_id</field>
+                    <tableName>hpfm_form_header</tableName>
+                    <columnName>form_header_id</columnName>
+                </reference>
+                <lang>
+                    <field>item_name</field>
+                    <pkName>form_line_id</pkName>
+                </lang>
+                <lang>
+                    <field>item_description</field>
+                    <pkName>form_line_id</pkName>
+                </lang>
+            </table>
+        </sheet>
+    </excel>
+    <excel name="hzero-platform-profile" description="配置维护" fileName="hzero-platform-profile" schema="hzero_platform">
+        <sheet name="profile" description="配置维护">
+            <table name="hpfm_profile" description="参数配置">
+                <sql>SELECT
+                        profile_id,
+                        profile_name,
+                        description,
+                        profile_level,
+                        tenant_id
+                    FROM
+                        hpfm_profile
+                    WHERE
+                        tenant_id=0
+                        and profile_name not like '%TEST%'
+                </sql>
+                <id>profile_id</id>
+                <cited>profile_id</cited>
+                <unique>profile_name,tenant_id</unique>
+            </table>
+            <table name="hpfm_profile_value" description="参数配置值">
+                <sql>SELECT
+                        profile_value_id,
+                        profile_id,
+                        level_code,
+                        level_value,
+                        VALUE
+                    FROM
+                        hpfm_profile_value
+                    WHERE
+                        value not like 'test%'
+                        and value not like '%TEST%'
+                        and value not like '测试'
+                </sql>
+                <id>profile_value_id</id>
+                <unique>profile_id</unique>
+                <reference>
+                    <field>profile_id</field>
+                    <tableName>hpfm_profile</tableName>
+                    <columnName>profile_id</columnName>
+                </reference>
+            </table>
+        </sheet>
+        <sheet name="language" description="语言">
+            <table name="fd_language" description="">
+                <sql>SELECT
+                        id,
+                        code,
+                        name,
+                        description
+                    FROM
+                        fd_language
+                    WHERE
+                        1=1
+                </sql>
+                <id>id</id>
+                <unique>code</unique>
+                <lang>
+                    <field>description</field>
+                    <pkName>id</pkName>
+                </lang>
+            </table>
+        </sheet>
+    </excel>
+    <excel name="hzero-platform-code-rule" description="编码规则" fileName="hzero-platform-code-rule"
+            schema="hzero_platform">
+        <sheet name="code-rule" description="编码规则数据">
+            <table name="hpfm_code_rule" description="编码规则头">
+                <sql>SELECT
+                        rule_id,
+                        rule_code,
+                        rule_name,
+                        rule_level,
+                        tenant_id,
+                        description
+                    FROM
+                        hpfm_code_rule
+                    WHERE
+                        tenant_id=0
+                        and rule_code not like '%TEST%'
+                </sql>
+                <id>rule_id</id>
+                <cited>rule_id</cited>
+                <unique>rule_code,tenant_id</unique>
+            </table>
+            <table name="hpfm_code_rule_dist" description="编码规则分配">
+                <sql>SELECT
+                        rule_dist_id,
+                        rule_id,
+                        level_code,
+                        level_value,
+                        used_flag,
+                        enabled_flag,
+                        description
+                    FROM
+                        hpfm_code_rule_dist
+                    WHERE
+                        enabled_flag = 1
+                        AND ( description NOT LIKE 'test%' OR description IS NULL )
+                        AND rule_id IN (
+                        SELECT
+                        rule_id
+                        FROM
+                        hpfm_code_rule
+                        WHERE
+                        tenant_id = 0
+                        AND rule_code NOT LIKE '%TEST%')
+                </sql>
+                <id>rule_dist_id</id>
+                <cited>rule_dist_id</cited>
+                <unique>rule_id,level_code,level_value</unique>
+                <reference>
+                    <field>rule_id</field>
+                    <tableName>hpfm_code_rule</tableName>
+                    <columnName>rule_id</columnName>
+                </reference>
+            </table>
+            <table name="hpfm_code_rule_detail" description="编码规则明细">
+                <sql>SELECT
+                        rule_detail_id,
+                        rule_dist_id,
+                        order_seq,
+                        field_type,
+                        field_value,
+                        date_mask,
+                        seq_length,
+                        start_value,
+                        current_value,
+                        reset_frequency,
+                        reset_date
+                    FROM
+                        hpfm_code_rule_detail
+                    WHERE
+                        (field_value not like 'TEST%' or field_value is null)
+                </sql>
+                <id>rule_detail_id</id>
+                <unique>
+                    rule_dist_id,order_seq
+                </unique>
+                <reference>
+                    <field>rule_dist_id</field>
+                    <tableName>hpfm_code_rule_dist</tableName>
+                    <columnName>rule_dist_id</columnName>
+                </reference>
+            </table>
+        </sheet>
+    </excel>
+    <excel name="hzero-platform-static-text" description="静态文本" fileName="hzero-platform-static-text"
+            schema="hzero_platform">
+        <sheet name="static-text" description="静态文本数据">
+            <table name="hpfm_static_text" description="平台静态信息">
+                <sql>SELECT
+                        text_id,
+                        text_code,
+                        title,
+                        description,
+                        parent_id,
+                        start_date,
+                        end_date,
+                        parent_ids,
+                        tenant_id,
+                        company_id
+                    FROM
+                        hpfm_static_text
+                    WHERE
+                        tenant_id = 0
+                        AND title NOT LIKE 'test%'
+                        AND title NOT LIKE 'TEST%'
+                        AND title NOT LIKE '测试%'
+                        AND (
+                        description NOT LIKE '%测试%'
+                        OR description IS NULL)
+                </sql>
+                <id>text_id</id>
+                <cited>text_id</cited>
+                <unique>text_code,parent_id,tenant_id</unique>
+            </table>
+            <table name="hpfm_static_text_value" description="平台静态信息值">
+                <sql>SELECT
+                        text_value_id,
+                        text_id,
+                        lang,
+                        title,
+                        description,
+                        text
+                    FROM
+                        hpfm_static_text_value
+                    WHERE
+                        title NOT LIKE 'test%'
+                        AND title NOT LIKE 'demo%'
+                        AND title NOT LIKE 'TEST%'
+                        AND title NOT LIKE '测试%'
+                </sql>
+                <id>text_value_id</id>
+                <reference>
+                    <field>text_id</field>
+                    <tableName>hpfm_static_text</tableName>
+                    <columnName>text_id</columnName>
+                </reference>
+            </table>
+        </sheet>
+    </excel>
+    <!--<excel name="hzero-platform-org" description="组织数据" fileName="hzero-platform-org" schema="hzero_platform">
+        <sheet name="tenant" description="组织信息">
+            <table name="hpfm_tenant" description="租户信息">
+                <sql>SELECT
+                        tenant_id,
+                        tenant_num,
+                        tenant_name,
+                        enabled_flag
+                    FROM
+                        hpfm_tenant
+                    WHERE
+                        enabled_flag=1
+                        and tenant_id=0
+                </sql>
+                <id>*tenant_id</id>
+                <unique>tenant_num</unique>
+                <lang>
+                    <field>tenant_name</field>
+                    <pkName>tenant_id</pkName>
+                </lang>
+            </table>
+            <table name="hpfm_group" description="集团信息">
+                <sql>SELECT
+                        group_id,
+                        group_num,
+                        group_name,
+                        tenant_id,
+                        unit_id,
+                        source_key,
+                        source_code,
+                        enabled_flag,
+                        core_flag
+                    FROM
+                        hpfm_group
+                    WHERE
+                        enabled_flag=1
+                        and tenant_id=0
+                </sql>
+                <id>group_id</id>
+                <unique>group_num,tenant_id</unique>
+            </table>
+        </sheet>
+        <sheet name="unit" description="组织架构">
+            <table name="hpfm_unit" description="组织">
+                <sql>SELECT
+                        unit_id,
+                        unit_code,
+                        unit_name,
+                        unit_type_code,
+                        tenant_id,
+                        description,
+                        order_seq,
+                        parent_unit_id,
+                        unit_company_id,
+                        supervisor_flag,
+                        enabled_flag,
+                        level_path,
+                        company_id,
+                        quick_index,
+                        phoneticize
+                    FROM
+                        hpfm_unit
+                    WHERE
+                        enabled_flag = 1
+                        AND tenant_id =0
+                        and unit_code not like 'TEST%'
+                </sql>
+                <id>unit_id</id>
+                <cited>unit_id</cited>
+                <unique>unit_code,unit_company_id</unique>
+
+                <reference>
+                    <field>parent_unit_id</field>
+                    <tableName>hpfm_unit</tableName>
+                    <columnName>unit_id</columnName>
+                </reference>
+                <reference>
+                    <field>unit_company_id</field>
+                    <tableName>hpfm_unit</tableName>
+                    <columnName>unit_id</columnName>
+                </reference>
+                <lang>
+                    <field>unit_name</field>
+                    <pkName>unit_id</pkName>
+                </lang>
+                <lang>
+                    <field>description</field>
+                    <pkName>unit_id</pkName>
+                </lang>
+            </table>
+        </sheet>
+    </excel>-->
+    <excel name="hzero-platform-dashboard-card" description="卡片数据" fileName="hzero-platform-dashboard-card"
+            schema="hzero_platform">
+        <sheet name="dashboard-card" description="卡片">
+            <table name="hpfm_dashboard_card" description="平台卡片表">
+                <sql>SELECT
+                        id,
+                        CODE,
+                        fd_level,
+                        catalog_type,
+                        NAME,
+                        description,
+                        w,
+                        h,
+                        enabled_flag,
+                        logo,
+                        tenant_id,
+                        card_params
+                    FROM
+                        hpfm_dashboard_card
+                    WHERE
+                        enabled_flag=1
+                        and tenant_id=0
+                        and code not like 'TEST%'
+                </sql>
+                <id>id</id>
+                <cited>id</cited>
+                <unique>code,tenant_id</unique>
+                <lang>
+                    <field>name</field>
+                    <pkName>id</pkName>
+                </lang>
+                <lang>
+                    <field>description</field>
+                    <pkName>id</pkName>
+                </lang>
+            </table>
+            <table name="hpfm_dashboard_clause" description="工作台条目配置">
+                <sql>SELECT
+                    clause_id,
+                    clause_code,
+                    clause_name,
+                    data_tenant_level,
+                    menu_code,
+                    route,
+                    stats_expression,
+                    doc_remark_expression,
+                    enabled_flag,
+                    remark,
+                    tenant_id
+                    FROM
+                    hpfm_dashboard_clause
+                    WHERE
+                    enabled_flag=1
+                    and tenant_id=0
+                    and clause_code not like 'TEST%'
+                </sql>
+                <id>clause_id</id>
+                <cited>clause_id</cited>
+                <unique>clause_code,tenant_id</unique>
+                <lang>
+                    <field>clause_name</field>
+                    <pkName>clause_id</pkName>
+                </lang>
+            </table>
+            <table name="hpfm_dashboard_card_clause" description="卡片条目">
+                <sql>SELECT
+                        id,
+                        card_id,
+                        clause_id,
+                        order_seq
+                    FROM
+                        hpfm_dashboard_card_clause
+                    WHERE
+                        card_id IN (
+                        SELECT
+                        id
+                        FROM
+                        hpfm_dashboard_card
+                        WHERE
+                        enabled_flag = 1
+                        AND tenant_id = 0
+                        AND CODE NOT LIKE 'TEST%')
+                </sql>
+                <id>id</id>
+                <unique>card_id,clause_id</unique>
+                <reference>
+                    <field>card_id</field>
+                    <tableName>hpfm_dashboard_card</tableName>
+                    <columnName>id</columnName>
+                </reference>
+                <reference>
+                    <field>clause_id</field>
+                    <tableName>hpfm_dashboard_clause</tableName>
+                    <columnName>clause_id</columnName>
+                </reference>
+            </table>
+            <table name="hpfm_dbd_clause_assign" description="工作台条目分配租户">
+                <sql>SELECT
+                        clause_assign_id,
+                        clause_id,
+                        tenant_id
+                    FROM
+                        hpfm_dbd_clause_assign
+                    WHERE
+                        tenant_id=0
+                </sql>
+                <id>clause_assign_id</id>
+                <unique>clause_id,tenant_id</unique>
+                <reference>
+                    <field>clause_id</field>
+                    <tableName>hpfm_dashboard_clause</tableName>
+                    <columnName>clause_id</columnName>
+                </reference>
+            </table>
+        </sheet>
+    </excel>
+</service>
